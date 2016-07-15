@@ -1,0 +1,30 @@
+---
+
+# If file exists and does not contain {{file_string_identifier}} string
+# rename to {{ file_dest }}.original_before_ansible.
+
+- name: Check file exists
+  stat:
+    path: "{{ file_dest }}"
+  register: file_stat
+  when: file_enable
+
+- name: Check if file is managed
+  command: grep -q "{{ file_identifier }}" {{ file_dest }}
+  when: file_stat.stat.isreg is defined and file_stat.stat.isreg and file_enable
+  register: file_is_ansible_managed
+  changed_when: False
+  failed_when: False
+
+- name: Keep a copy of original file
+  command: mv "{{ file_dest }}" "{{ file_dest }}".original_before_ansible
+  when: file_is_ansible_managed.rc|default(0) > 0 and file_enable
+
+- name: Copy file
+  copy:
+    src: "{{ file_src }}"
+    dest: "{{ file_dest }}"
+    mode: "{{ file_mode }}"
+    owner: "{{ file_owner }}"
+    group: "{{ file_owner }}"
+  when: file_enable

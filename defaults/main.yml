@@ -1,0 +1,5 @@
+---
+file_owner: root
+file_mode: "0600"
+file_enable: True
+file_string_identifier: "^# Ansible managed: "
